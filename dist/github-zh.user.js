@@ -2,7 +2,7 @@
 // @name         GitHub 中文化
 // @name:zh-CN   GitHub 中文化
 // @namespace    https://github.com/XianYuYaaa/github-zh
-// @version      1.0.0
+// @version      1.0.1
 // @description  汉化 GitHub 界面固定文本，词典来自远程仓库，可随时更新。
 // @description:zh-CN  Translate GitHub's fixed UI text into Simplified Chinese.
 // @author       XianYuYaaa
@@ -26,7 +26,7 @@
 // @noframes
 // ==/UserScript==
 
-var __GHZ_DEFAULTS__ = {"dictUrl":"https://raw.githubusercontent.com/XianYuYaaa/github-zh/main/i18n/zh-CN.json","version":"1.0.0"};
+var __GHZ_DEFAULTS__ = {"dictUrl":"https://raw.githubusercontent.com/XianYuYaaa/github-zh/main/i18n/zh-CN.json","version":"1.0.1"};
 
 // ==================== fallback.js ====================
 // 内置精简词典：保证脚本离线/词典拉取失败时首屏也有基本汉化。
