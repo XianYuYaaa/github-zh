@@ -9,10 +9,10 @@ const dictFile = path.join(root, 'i18n', 'zh-CN.json');
 
 const pkg = {
   version: '1.0.0',
-  author: 'github-zh',
-  repo: 'https://github.com/github-zh/github-zh',
+  author: 'XianYuYaaa',
+  repo: 'https://github.com/XianYuYaaa/github-zh',
   // 装好脚本后也能在 Tampermonkey 菜单里改这个地址，不需要重装
-  dictUrl: 'https://raw.githubusercontent.com/github-zh/github-zh/main/i18n/zh-CN.json',
+  dictUrl: 'https://raw.githubusercontent.com/XianYuYaaa/github-zh/main/i18n/zh-CN.json',
 };
 
 const header = `// ==UserScript==

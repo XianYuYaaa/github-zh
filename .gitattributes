@@ -1,0 +1,4 @@
+# 用户脚本和词典统一用 LF，避免不同平台的换行差异
+*.js  text eol=lf
+*.json text eol=lf
+*.md  text eol=lf

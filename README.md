@@ -8,6 +8,10 @@
 2. 新建脚本，把 [`dist/github-zh.user.js`](dist/github-zh.user.js) 的内容整个粘贴进去，保存
 3. 刷新 GitHub
 
+或者点下面这个链接直接安装（Tampermonkey 会自动识别）：
+
+[![安装](https://raw.githubusercontent.com/XianYuYaaa/github-zh/main/dist/github-zh.user.js)](https://raw.githubusercontent.com/XianYuYaaa/github-zh/main/dist/github-zh.user.js)
+
 ## 词典
 
 | 文件 | 作用 |
@@ -27,7 +31,7 @@
 
 ### 改词典地址
 
-Tampermonkey 菜单 → **设置汉化词典地址**，填你的 `zh-CN.json` 地址（仓库默认已填好官方地址）。
+Tampermonkey 菜单 → **设置汉化词典地址**，默认已指向本仓库的 `i18n/zh-CN.json`。
 
 ## 翻译策略
 

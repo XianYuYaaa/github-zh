@@ -1,11 +1,11 @@
 // ==UserScript==
 // @name         GitHub 中文化
 // @name:zh-CN   GitHub 中文化
-// @namespace    https://github.com/github-zh/github-zh
+// @namespace    https://github.com/XianYuYaaa/github-zh
 // @version      1.0.0
 // @description  汉化 GitHub 界面固定文本，词典来自远程仓库，可随时更新。
 // @description:zh-CN  Translate GitHub's fixed UI text into Simplified Chinese.
-// @author       github-zh
+// @author       XianYuYaaa
 // @license      MIT
 // @match        *://github.com/*
 // @icon         https://github.githubassets.com/favicons/favicon.svg
@@ -19,14 +19,14 @@
 // @connect      raw.github.com
 // @connect      gist.githubusercontent.com
 // @connect      gist.github.com
-// @updateURL    https://github.com/github-zh/github-zh/raw/main/dist/github-zh.user.js
-// @downloadURL  https://github.com/github-zh/github-zh/raw/main/dist/github-zh.user.js
-// @homepageURL  https://github.com/github-zh/github-zh
-// @supportURL   https://github.com/github-zh/github-zh/issues
+// @updateURL    https://github.com/XianYuYaaa/github-zh/raw/main/dist/github-zh.user.js
+// @downloadURL  https://github.com/XianYuYaaa/github-zh/raw/main/dist/github-zh.user.js
+// @homepageURL  https://github.com/XianYuYaaa/github-zh
+// @supportURL   https://github.com/XianYuYaaa/github-zh/issues
 // @noframes
 // ==/UserScript==
 
-var __GHZ_DEFAULTS__ = {"dictUrl":"https://raw.githubusercontent.com/github-zh/github-zh/main/i18n/zh-CN.json","version":"1.0.0"};
+var __GHZ_DEFAULTS__ = {"dictUrl":"https://raw.githubusercontent.com/XianYuYaaa/github-zh/main/i18n/zh-CN.json","version":"1.0.0"};
 
 // ==================== fallback.js ====================
 // 内置精简词典：保证脚本离线/词典拉取失败时首屏也有基本汉化。
