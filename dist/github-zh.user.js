@@ -2,7 +2,7 @@
 // @name         GitHub 中文化
 // @name:zh-CN   GitHub 中文化
 // @namespace    https://github.com/XianYuYaaa/github-zh
-// @version      1.1.0
+// @version      1.2.0
 // @description  汉化 GitHub 界面固定文本。词典从仓库拉取，改翻译无需重装。
 // @description:zh-CN  Translate GitHub's fixed UI text into Simplified Chinese. Dictionary is fetched from the repo, so updating translations needs no reinstall.
 // @author       XianYuYaaa
@@ -374,7 +374,13 @@ var __GHZ_DICT_URL__ = "https://raw.githubusercontent.com/XianYuYaaa/github-zh/m
     for (var k in data.terms) {
       if (Object.prototype.hasOwnProperty.call(data.terms, k)) terms[k] = data.terms[k];
     }
-    return { version: data.version || 0, terms: terms, phrases: phrases };
+    // rawPhrases 保留未编译的规则文本，写缓存时用（RegExp 无法序列化）
+    return {
+      version: data.version || 0,
+      terms: terms,
+      phrases: phrases,
+      rawPhrases: Array.isArray(data.phrases) ? data.phrases : [],
+    };
   }
 
   // ---------------------------------------------------------------- 缓存
@@ -390,8 +396,8 @@ var __GHZ_DICT_URL__ = "https://raw.githubusercontent.com/XianYuYaaa/github-zh/m
 
   function writeCache(data) {
     try {
-      // 缓存只存原始数据，编译后的正则重新生成
-      localStorage.setItem(CACHE_KEY, JSON.stringify({ at: Date.now(), data: { version: data.version, terms: data.terms, phrases: [] } }));
+      // 缓存只存原始数据：词条 + 未编译的短语规则，读取时由 parse() 重新编译
+      localStorage.setItem(CACHE_KEY, JSON.stringify({ at: Date.now(), data: { version: data.version, terms: data.terms, phrases: data.rawPhrases } }));
     } catch (e) { /* 配额不足就算了 */ }
   }
 

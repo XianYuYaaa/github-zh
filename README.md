@@ -19,7 +19,7 @@
 **脚本本身不含任何词条**（只有 16 KB 的引擎），词典全部从仓库的 `i18n/zh-CN.json` 拉取。
 
 ```
-i18n/zh-CN.json          ← 唯一需要维护的地方（1250 词条 + 90 短语规则）
+i18n/zh-CN.json          ← 唯一需要维护的地方（1255 词条 + 108 短语规则）
         ↓ 启动时拉取，缓存 6 小时
 dist/github-zh.user.js   ← 只负责匹配和替换
 ```
@@ -37,13 +37,15 @@ dist/github-zh.user.js   ← 只负责匹配和替换
 - **只替换完整单词**：词边界校验，`is` 不会命中 `This`，`or` 不会命中 `refactor`
 - **长句优先**：`Open in codespace` 不会被拆成 `Open` + 剩余
 - **跳过用户内容**：README、评论、提交信息、文件名、分支名、语言名（`Inno Setup`、`Objective-C++`）
-- **日期和数字自动转**：`Sep 3, 2026` → `2026年9月3日`，`12.7M results` → `12.7M 个结果`
+- **日期和数字自动转**：`Sep 3, 2026` → `2026年9月3日`，`Sep 3` → `9月3日`，`12.7M results` → `12.7M 个结果`
 
-保留英文的词：`Fork`、`Wiki`、`Copilot`、`Markdown`、`Blame` —— 这些硬译反而看不懂。
+术语口径对齐 GitHub 官方中文文档：拉取请求（Pull request）、星标（Star）、议题（Issue）。
+
+保留英文的词：`Fork`、`Wiki`、`Copilot`、`Markdown`、`Blame`、`Actions` —— 这些硬译反而看不懂。
 
 ## 已覆盖的页面
 
-首页仪表盘、仓库页、议题 / 合并请求列表与筛选栏、代码与提交历史、Compare、Actions、Releases、Security、Insights、Wiki、搜索、通知、个人资料与设置、新建仓库、Explore、Trending、登录 / 定价 / Copilot。
+首页仪表盘、仓库页、议题 / 拉取请求列表与筛选栏、代码与提交历史、Compare、Actions、Releases、Security、Insights、Wiki、搜索、通知、个人资料与设置、新建仓库、Explore、Trending、登录 / 定价 / Copilot。
 
 ## 维护
 

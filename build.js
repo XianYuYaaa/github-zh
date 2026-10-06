@@ -9,7 +9,7 @@ const outDir = path.join(root, 'dist');
 const dictFile = path.join(root, 'i18n', 'zh-CN.json');
 
 const pkg = {
-  version: '1.1.0',
+  version: '1.2.0',
   author: 'XianYuYaaa',
   repo: 'https://github.com/XianYuYaaa/github-zh',
   dictUrl: 'https://raw.githubusercontent.com/XianYuYaaa/github-zh/main/i18n/zh-CN.json',
