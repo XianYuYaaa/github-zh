@@ -1,4 +1,5 @@
-// 构建：合并 src/ 下的模块成单个油猴脚本，并校验 i18n/zh-CN.json
+// 构建：合并 src/core.js + src/loader.js 成单个油猴脚本，并校验 i18n/zh-CN.json。
+// 脚本本身不含任何词条，词典全部从远程仓库拉取。
 const fs = require('fs');
 const path = require('path');
 
@@ -8,10 +9,9 @@ const outDir = path.join(root, 'dist');
 const dictFile = path.join(root, 'i18n', 'zh-CN.json');
 
 const pkg = {
-  version: '1.0.1',
+  version: '1.1.0',
   author: 'XianYuYaaa',
   repo: 'https://github.com/XianYuYaaa/github-zh',
-  // 装好脚本后也能在 Tampermonkey 菜单里改这个地址，不需要重装
   dictUrl: 'https://raw.githubusercontent.com/XianYuYaaa/github-zh/main/i18n/zh-CN.json',
 };
 
@@ -20,16 +20,14 @@ const header = `// ==UserScript==
 // @name:zh-CN   GitHub 中文化
 // @namespace    ${pkg.repo}
 // @version      ${pkg.version}
-// @description  汉化 GitHub 界面固定文本，词典来自远程仓库，可随时更新。
-// @description:zh-CN  Translate GitHub's fixed UI text into Simplified Chinese.
+// @description  汉化 GitHub 界面固定文本。词典从仓库拉取，改翻译无需重装。
+// @description:zh-CN  Translate GitHub's fixed UI text into Simplified Chinese. Dictionary is fetched from the repo, so updating translations needs no reinstall.
 // @author       ${pkg.author}
 // @license      MIT
 // @match        *://github.com/*
 // @icon         https://github.githubassets.com/favicons/favicon.svg
 // @run-at       document-start
 // @grant        GM_xmlhttpRequest
-// @grant        GM_getValue
-// @grant        GM_setValue
 // @grant        GM_registerMenuCommand
 // @connect      raw.githubusercontent.com
 // @connect      github.com
@@ -44,7 +42,8 @@ const header = `// ==UserScript==
 // ==/UserScript==
 `;
 
-const defaults = `var __GHZ_DEFAULTS__ = ${JSON.stringify({ dictUrl: pkg.dictUrl, version: pkg.version })};`;
+// 词典地址以常量形式注入，改仓库地址只需改 build.js 这一处
+const dictUrlConst = `var __GHZ_DICT_URL__ = ${JSON.stringify(pkg.dictUrl)};`;
 
 // 保留英文的词：官方术语或音译更自然，硬译反而看不懂
 const KEEP_ENGLISH = new Set(['Fork', 'Wiki', 'Copilot', 'Gist', 'Markdown', 'Blame']);
@@ -88,8 +87,8 @@ function validateDict(dict) {
 const dict = JSON.parse(fs.readFileSync(dictFile, 'utf8'));
 const problems = validateDict(dict);
 
-const modules = ['fallback.js', 'core.js', 'loader.js'];
-let out = header + '\n' + defaults + '\n';
+const modules = ['core.js', 'loader.js'];
+let out = header + '\n' + dictUrlConst + '\n';
 for (const m of modules) {
   const p = path.join(srcDir, m);
   if (!fs.existsSync(p)) throw new Error('缺少源文件: ' + p);
@@ -109,12 +108,19 @@ try {
   process.exit(1);
 }
 
+// 脚本里不该残留任何词条
+if (/terms\s*:\s*\{\s*["'][^"']+["']\s*:/.test(out)) {
+  console.error('产物里混进了词条，脚本应当只从远程拉词典');
+  process.exit(1);
+}
+
 const size = Buffer.byteLength(out, 'utf8');
 console.log('输出   :', outFile);
 console.log('大小   :', size, 'bytes (' + (size / 1024).toFixed(1) + ' KB)');
-console.log('词条   :', Object.keys(dict.terms).length);
+console.log('词条   :', Object.keys(dict.terms).length, '（全部在 i18n/zh-CN.json，脚本内不含词条）');
 console.log('短语   :', dict.phrases.length);
 console.log('词典   :', (fs.statSync(dictFile).size / 1024).toFixed(1), 'KB');
+console.log('词典地址:', pkg.dictUrl);
 
 if (problems.length) {
   console.log('\n词典告警 ' + problems.length + ' 条:');

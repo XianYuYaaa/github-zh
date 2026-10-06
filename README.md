@@ -1,57 +1,54 @@
 # GitHub 中文化（油猴脚本）
 
-把 GitHub 界面里的固定英文文本翻成简体中文。**不碰用户自己写的内容**——README、提交信息、文件名、议题标题、评论内容一律原样保留。
+把 GitHub 界面里的固定英文文本翻成简体中文。**不碰用户自己写的内容**——README、提交信息、文件名、议题标题、评论一律原样保留。
 
 ## 安装
 
-1. 浏览器装 [Tampermonkey](https://www.tampermonkey.net/)
-2. 新建脚本，把 [`dist/github-zh.user.js`](dist/github-zh.user.js) 的内容整个粘贴进去，保存
-3. 刷新 GitHub
-
-或者点下面这个链接直接安装（Tampermonkey 会自动识别）：
+点下面的链接，Tampermonkey 会自动弹出安装：
 
 [![安装](https://raw.githubusercontent.com/XianYuYaaa/github-zh/main/dist/github-zh.user.js)](https://raw.githubusercontent.com/XianYuYaaa/github-zh/main/dist/github-zh.user.js)
 
-## 词典
+手动装也行：Tampermonkey → 新建脚本 → 粘贴 `dist/github-zh.user.js` 全部内容 → 保存。
 
-| 文件 | 作用 |
-|---|---|
-| `i18n/zh-CN.json` | **完整词典**，1250 条词条 + 90 条短语规则 |
-| `src/fallback.js` | 脚本内置的 168 条精简词典 |
-| `src/core.js` | 匹配引擎 |
-| `src/loader.js` | 词典加载（远程 → 缓存 → 内置兜底） |
+## 词典怎么工作
 
-词典和脚本分开存放，所以改翻译**不需要重装脚本**。
+**脚本本身不含任何词条**（只有 16 KB 的引擎），词典全部从仓库的 `i18n/zh-CN.json` 拉取。
 
-### 加载顺序
+```
+i18n/zh-CN.json    ← 唯一需要维护的地方（1250 词条 + 90 短语规则）
+        ↓ 启动时拉取，缓存 6 小时
+dist/github-zh.user.js  ← 只负责匹配和替换
+```
 
-1. 先用内置精简词典翻一遍，首屏不等网络
-2. 拉到远程完整词典后，把已翻的内容还原，再按新词典整体重译（不会留下半句没翻的文字）
-3. 远程拉取失败就用内置词典，缓存 6 小时
+好处是**改翻译不用重装脚本**——改完 `zh-CN.json` 推上去，刷新页面就生效。维护时只有一处需要同步，不会出现脚本和词典打架。
 
-### 改词典地址
+拉取失败（断网、CDN 抖动）时会自动重试 4 次，都失败就保持页面原样，不会半吊子翻译。
 
-Tampermonkey 菜单 → **设置汉化词典地址**，默认已指向本仓库的 `i18n/zh-CN.json`。
+菜单里有两个命令：**重新加载汉化词典**（清缓存刷新）、**复制词典地址**。
 
 ## 翻译策略
 
 宁可漏翻也不误翻，所以：
 
-- **只替换完整单词**：词边界校验，`is` 不会命中 `This`
+- **只替换完整单词**：词边界校验，`is` 不会命中 `This`，`or` 不会命中 `refactor`
 - **长句优先**：`Open in codespace` 不会被拆成 `Open` + 剩余
 - **跳过用户内容**：README、评论、提交信息、文件名、分支名、语言名（`Inno Setup`、`Objective-C++`）
 - **日期和数字自动转**：`Sep 3, 2026` → `2026年9月3日`，`12.7M results` → `12.7M 个结果`
 
-## 自行构建
+## 维护
 
 ```bash
 node build.js
 ```
 
-合并 `src/` 下的模块并校验词典（有语法错误、译文为空、短词误伤风险等会报警告）。改完 `src/` 或 `i18n/` 后跑一次。
+合并 `src/core.js` + `src/loader.js` 成 `dist/github-zh.user.js`，并校验词典（空译文、译文等于原文、短词误伤风险、重复/非法正则都会报警告）。
+
+改词典地址只需改 `build.js` 里的 `pkg.dictUrl`。
 
 ## 说明
 
-GitHub 本身没有官方简体中文界面，页面文本由前端 JS 渲染，所以只能用脚本替换。保留英文的词：`Fork`、`Wiki`、`Copilot`、`Markdown`、`Blame` —— 这些硬译反而看不懂。
+GitHub 本身没有官方简体中文界面，页面文本由前端 JS 渲染，所以只能用脚本替换。
+
+保留英文的词：`Fork`、`Wiki`、`Copilot`、`Markdown`、`Blame` —— 这些硬译反而看不懂。
 
 MIT License

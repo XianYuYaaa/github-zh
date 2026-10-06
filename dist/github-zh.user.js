@@ -2,17 +2,15 @@
 // @name         GitHub 中文化
 // @name:zh-CN   GitHub 中文化
 // @namespace    https://github.com/XianYuYaaa/github-zh
-// @version      1.0.1
-// @description  汉化 GitHub 界面固定文本，词典来自远程仓库，可随时更新。
-// @description:zh-CN  Translate GitHub's fixed UI text into Simplified Chinese.
+// @version      1.1.0
+// @description  汉化 GitHub 界面固定文本。词典从仓库拉取，改翻译无需重装。
+// @description:zh-CN  Translate GitHub's fixed UI text into Simplified Chinese. Dictionary is fetched from the repo, so updating translations needs no reinstall.
 // @author       XianYuYaaa
 // @license      MIT
 // @match        *://github.com/*
 // @icon         https://github.githubassets.com/favicons/favicon.svg
 // @run-at       document-start
 // @grant        GM_xmlhttpRequest
-// @grant        GM_getValue
-// @grant        GM_setValue
 // @grant        GM_registerMenuCommand
 // @connect      raw.githubusercontent.com
 // @connect      github.com
@@ -26,246 +24,15 @@
 // @noframes
 // ==/UserScript==
 
-var __GHZ_DEFAULTS__ = {"dictUrl":"https://raw.githubusercontent.com/XianYuYaaa/github-zh/main/i18n/zh-CN.json","version":"1.0.1"};
-
-// ==================== fallback.js ====================
-// 内置精简词典：保证脚本离线/词典拉取失败时首屏也有基本汉化。
-// 由 tools/make-fallback.js 从 i18n/zh-CN.json 生成，请勿手工编辑。
-(function (scope) {
-  'use strict';
-  scope.__GHZ_FALLBACK__ = {
-  "version": 0,
-  "terms": {
-    "Skip to content": "跳到主要内容",
-    "Skip to main content": "跳到主要内容",
-    "Open menu": "打开菜单",
-    "Homepage": "首页",
-    "Dashboard": "仪表盘",
-    "Home": "首页",
-    "Feed": "动态",
-    "Preview": "预览",
-    "Loading": "加载中",
-    "Loading...": "加载中...",
-    "Loading…": "加载中…",
-    "Search": "搜索",
-    "Search this repository": "搜索此仓库",
-    "Search issues": "搜索议题",
-    "Search pull requests": "搜索合并请求",
-    "Search notifications": "搜索通知",
-    "Type": "输入",
-    "to search": "搜索",
-    "Open quick search dialog, type / to search": "打开快捷搜索框，输入 / 进行搜索",
-    "Chat with Copilot": "与 Copilot 对话",
-    "Create new...": "新建...",
-    "All issues": "所有议题",
-    "All pull requests": "所有合并请求",
-    "All repositories": "所有仓库",
-    "Notifications": "通知",
-    "Settings": "设置",
-    "Appearance": "外观",
-    "Accessibility": "无障碍",
-    "Menu": "菜单",
-    "Cancel": "取消",
-    "Close": "关闭",
-    "Save": "保存",
-    "Saved": "已保存",
-    "Done": "完成",
-    "Delete": "删除",
-    "Remove": "移除",
-    "Edit": "编辑",
-    "Add": "添加",
-    "Update": "更新",
-    "Create": "创建",
-    "Submit": "提交",
-    "Confirm": "确认",
-    "Continue": "继续",
-    "Previous": "上一页",
-    "Next": "下一页",
-    "More": "更多",
-    "Learn more": "了解更多",
-    "Dismiss": "忽略",
-    "Clear": "清除",
-    "Clear filter": "清除筛选",
-    "Filter": "筛选",
-    "Sort by:": "排序方式：",
-    "Newest": "最新",
-    "Oldest": "最旧",
-    "Open": "打开",
-    "Closed": "已关闭",
-    "Date": "日期",
-    "Repository": "仓库",
-    "Language": "语言",
-    "Today": "今天",
-    "This week": "本周",
-    "This month": "本月",
-    "Code": "代码",
-    "Issues": "议题",
-    "Pull requests": "合并请求",
-    "Pull request": "合并请求",
-    "Discussions": "讨论",
-    "Actions": "操作",
-    "Projects": "项目",
-    "Wiki": "Wiki",
-    "Security": "安全",
-    "Insights": "洞察",
-    "Watch": "关注",
-    "Star": "收藏",
-    "Unstar": "取消收藏",
-    "Starred": "已收藏",
-    "Fork": "Fork",
-    "Sponsor": "赞助",
-    "About": "关于",
-    "Releases": "发行版",
-    "Packages": "软件包",
-    "Contributors": "贡献者",
-    "Latest commit": "最新提交",
-    "Branches": "分支",
-    "Tags": "标签",
-    "Go to file": "跳转到文件",
-    "Add file": "添加文件",
-    "History": "历史",
-    "Name": "名称",
-    "Activity": "活动",
-    "Owner": "所有者",
-    "Author": "作者",
-    "Assignees": "负责人",
-    "Labels": "标签",
-    "Milestones": "里程碑",
-    "New issue": "新建议题",
-    "New pull request": "新建合并请求",
-    "Terms": "条款",
-    "Privacy": "隐私",
-    "Status": "状态",
-    "Community": "社区",
-    "Docs": "文档",
-    "Contact": "联系我们",
-    "Manage cookies": "管理 Cookie",
-    "Switch repository": "切换仓库",
-    "Open in github.dev": "在 github.dev 中打开",
-    "Open in codespace": "在 Codespace 中打开",
-    "See your forks of this repository": "查看你 Fork 的此仓库副本",
-    "View all files": "查看全部文件",
-    "Assigned to me": "分配给我的",
-    "Created by me": "我创建的",
-    "Mentioned": "提到我的",
-    "Views": "浏览量",
-    "Reviews": "评审",
-    "Review required": "需要评审",
-    "Approved": "已批准",
-    "Comment": "评论",
-    "Reply": "回复",
-    "Watchers": "关注者",
-    "Contributing": "贡献指南",
-    "Code of conduct": "行为准则",
-    "Security policy": "安全策略",
-    "License": "许可证",
-    "Topics": "主题",
-    "New repository": "新建仓库",
-    "Create a new repository": "创建新仓库",
-    "Create repository": "创建仓库",
-    "Repository name": "仓库名称",
-    "Description": "描述",
-    "Configuration": "配置",
-    "Public": "公开",
-    "Private": "私有",
-    "Advanced": "高级",
-    "Advanced search": "高级搜索",
-    "Sign in": "登录",
-    "Sign out": "退出登录",
-    "Sign up": "注册",
-    "Overview": "概览",
-    "Profile": "个人资料",
-    "Account": "账号",
-    "Inbox": "收件箱",
-    "Mark all read notifications as done": "将所有已读通知标记为完成",
-    "Collapse sidebar": "收起侧边栏",
-    "Add new filter": "添加新的筛选器",
-    "Newest to oldest": "从新到旧",
-    "Oldest to newest": "从旧到新",
-    "Notifications by date": "按日期显示的通知",
-    "Clear out the clutter.": "清理杂物。",
-    "Resources": "资源",
-    "Readme": "说明文档",
-    "Deployments": "部署",
-    "Stargazers": "收藏者",
-    "Report repository": "举报仓库",
-    "Latest": "最新",
-    "Commit changes": "提交更改",
-    "You have no unread notifications": "你没有未读通知",
-    "Open user navigation menu": "打开用户导航菜单",
-    "Dismiss alert": "关闭提示",
-    "No results found": "没有找到结果",
-    "Retry": "重试",
-    "Copy": "复制",
-    "Copied": "已复制",
-    "Unsubscribe": "取消订阅",
-    "Subscribe": "订阅",
-    "Mark as read": "标记为已读",
-    "Followers": "关注者",
-    "Contributing guidelines": "贡献指南",
-    "Good first issues": "适合新贡献者的议题"
-  },
-  "phrases": [
-    {
-      "pattern": "^([\\d,.kKmM]+)\\s+Commits$",
-      "flags": "",
-      "replacement": "$1 次提交"
-    },
-    {
-      "pattern": "^([\\d,.kKmM]+)\\s+commits?$",
-      "flags": "i",
-      "replacement": "$1 次提交"
-    },
-    {
-      "pattern": "^([\\d,.kKmM]+)\\s+reactions$",
-      "flags": "",
-      "replacement": "$1 个回应"
-    },
-    {
-      "pattern": "^([\\d,.kKmM]+)\\s+people reacted$",
-      "flags": "",
-      "replacement": "$1 人回应"
-    },
-    {
-      "pattern": "^([\\d,.kKmM]+)\\s+stars today$",
-      "flags": "",
-      "replacement": "今日新增 $1 收藏"
-    },
-    {
-      "pattern": "^([\\d,.kKmM+]+)\\s+results?$",
-      "flags": "",
-      "replacement": "$1 个结果"
-    },
-    {
-      "pattern": "results?\\s*$",
-      "flags": "",
-      "replacement": "个结果"
-    },
-    {
-      "pattern": "Updated\\s+(.+)$",
-      "flags": "",
-      "replacement": "更新于 $1"
-    },
-    {
-      "pattern": "^0\\s+results$",
-      "flags": "",
-      "replacement": "0 个结果"
-    }
-  ]
-};
-})(typeof unsafeWindow !== 'undefined' ? unsafeWindow : window);
+var __GHZ_DICT_URL__ = "https://raw.githubusercontent.com/XianYuYaaa/github-zh/main/i18n/zh-CN.json";
 
 // ==================== core.js ====================
-// 引擎：词典 -> 编译 -> 应用。匹配规则刻意保守，宁可漏翻也不误翻用户内容。
+// 汉化引擎：装载词典 -> 编译 -> 遍历 DOM 替换。
+// 匹配策略刻意保守，宁可漏翻也不误翻用户自己写的内容。
 (function (scope) {
   'use strict';
 
   var CONFIG = {
-    enabled: true,
-    translateAttributes: true,
-    observeMutations: true,
-    // 匹配策略：'word' 只替换完整单词/整段短语；'substring' 会误伤 refactor 这类词，默认关闭
-    matchMode: 'word',
     // 用户自己写的内容、以及会与词典冲突的标识符，一律不动
     skip: [
       // --- 代码 ---
@@ -291,11 +58,21 @@ var __GHZ_DEFAULTS__ = {"dictUrl":"https://raw.githubusercontent.com/XianYuYaaa/
       // 语言名（Inno Setup、Objective-C++ 等是专有名词，翻译反而看不懂）
       '[class*="languageName"]', '[class*="languageList"]'
     ],
-    // 属性
+    // 需要翻译的属性
     attrs: ['title', 'aria-label', 'placeholder', 'alt']
   };
 
-  // ------------------------------------------------------------------ 匹配
+  var ATTRS = CONFIG.attrs;
+  var SKIP_SEL = CONFIG.skip.join(',');
+  // 热点路径：先按 classList 快速判掉常见容器，省掉每次 matches() 的开销
+  var FAST_SKIP = {
+    'markdown-body': 1,
+    'comment-body': 1,
+    'react-directory-commit-message': 1,
+    'react-directory-filename-cell': 1,
+    'topic-tag': 1
+  };
+
   var WORD = /[A-Za-z0-9_]/;
   var memo = new Map();
 
@@ -305,8 +82,6 @@ var __GHZ_DEFAULTS__ = {"dictUrl":"https://raw.githubusercontent.com/XianYuYaaa/
   var phrases = [];
 
   function compile(data) {
-    // 换词典之前先还原上一轮的改动
-    revertAll();
     pairs = [];
     exactMap = new Map();
     phrases = (data && data.phrases) || [];
@@ -315,6 +90,7 @@ var __GHZ_DEFAULTS__ = {"dictUrl":"https://raw.githubusercontent.com/XianYuYaaa/
     var keys = Object.keys(terms).filter(function (k) {
       return k && typeof terms[k] === 'string' && terms[k] && terms[k] !== k;
     });
+    // 按长度降序，保证 "Open in codespace" 先于 "Open"
     keys.sort(function (a, b) {
       if (b.length !== a.length) return b.length - a.length;
       return a < b ? -1 : a > b ? 1 : 0;
@@ -323,6 +99,7 @@ var __GHZ_DEFAULTS__ = {"dictUrl":"https://raw.githubusercontent.com/XianYuYaaa/
       pairs.push([keys[i], terms[keys[i]]]);
       if (!exactMap.has(keys[i])) exactMap.set(keys[i], terms[keys[i]]);
     }
+    memo.clear();
   }
 
   // ------------------------------------------------------------------ 匹配
@@ -333,27 +110,22 @@ var __GHZ_DEFAULTS__ = {"dictUrl":"https://raw.githubusercontent.com/XianYuYaaa/
     return translated;
   }
 
-  // 只在完整单词边界处替换：前后都不能紧邻字母/数字/下划线
+  // 只在完整单词边界处替换：前后都不能紧邻字母/数字/下划线。
+  // 这样 "is" 不会命中 "This"，"or" 不会命中 "refactor"。
   function replaceBounded(hay, needle, rep) {
     var out = '';
     var i = 0;
-    var guard = 0;
-    while (guard++ < 10000) {
+    while (i < hay.length) {
       var idx = hay.indexOf(needle, i);
       if (idx === -1) break;
       var before = idx > 0 ? hay.charAt(idx - 1) : ' ';
       var at = idx + needle.length;
       var after = at < hay.length ? hay.charAt(at) : ' ';
-      var ok = !WORD.test(before) && !WORD.test(after);
       out += hay.slice(i, idx);
-      out += ok ? matchCase(needle, rep) : needle;
+      out += !WORD.test(before) && !WORD.test(after) ? matchCase(needle, rep) : needle;
       i = at;
     }
     return out + hay.slice(i);
-  }
-
-  function replaceAny(hay, needle, rep) {
-    return hay.split(needle).join(rep);
   }
 
   function translateString(str) {
@@ -364,8 +136,8 @@ var __GHZ_DEFAULTS__ = {"dictUrl":"https://raw.githubusercontent.com/XianYuYaaa/
 
     var out = str;
 
-    // 1) 短语规则先行（处理数字拼接等动态句式）
-    //    规则带 g 标志，直接 replace 即可，不要先 test()，否则 lastIndex 会残留
+    // 1) 短语规则先行，处理 "12.7M results" 这类数字拼接的动态句式。
+    //    规则带 g 标志，直接 replace，不要先 test()，否则 lastIndex 会残留。
     for (var r = 0; r < phrases.length; r++) {
       var re = phrases[r].re;
       re.lastIndex = 0;
@@ -373,15 +145,15 @@ var __GHZ_DEFAULTS__ = {"dictUrl":"https://raw.githubusercontent.com/XianYuYaaa/
       if (replaced !== out) out = replaced;
     }
 
-    // 2) 整串精确命中：UI 标签绝大多数属于这种情况，O(1)
-    if (exactMap.has(out)) out = exactMap.get(out);
-    else {
-      // 3) 词内替换兜底
-      var fn = CONFIG.matchMode === 'word' ? replaceBounded : replaceAny;
+    // 2) 整串精确命中：界面标签绝大多数属于这种情况，O(1)
+    if (exactMap.has(out)) {
+      out = exactMap.get(out);
+    } else {
+      // 3) 词边界替换兜底
       for (var i = 0; i < pairs.length; i++) {
         var key = pairs[i][0];
         if (key.length > out.length) continue;
-        if (out.indexOf(key) !== -1) out = fn(out, key, pairs[i][1]);
+        if (out.indexOf(key) !== -1) out = replaceBounded(out, key, pairs[i][1]);
       }
     }
 
@@ -390,49 +162,7 @@ var __GHZ_DEFAULTS__ = {"dictUrl":"https://raw.githubusercontent.com/XianYuYaaa/
     return out;
   }
 
-  // ------------------------------------------------------------------ 应用
-  var skipSel = CONFIG.skip.join(',');
-
-  function isSkipped(el) {
-    var node = el;
-    while (node && node.nodeType === 1) {
-      if (node.classList) {
-        // 热点路径：先用 classList 判掉常见容器，避免每次都走 matches()
-        var cl = node.classList;
-        for (var i = 0; i < cl.length; i++) {
-          var c = cl[i];
-          if (c === 'markdown-body' || c === 'comment-body' || c === 'react-directory-commit-message' ||
-              c === 'react-directory-filename-cell' || c === 'topic-tag') return true;
-        }
-      }
-      try {
-        if (node.matches(skipSel)) return true;
-      } catch (e) { /* 选择器异常则忽略 */ }
-      node = node.parentElement;
-    }
-    return false;
-  }
-
-  function translateAttrs(el) {
-    if (!CONFIG.translateAttributes) return false;
-    var changed = false;
-    for (var i = 0; i < CONFIG.attrs.length; i++) {
-      var name = CONFIG.attrs[i];
-      var val = el.getAttribute(name);
-      if (!val || !/[A-Za-z]/.test(val)) continue;
-      var src = normalize(val);
-      var t = translateString(src);
-      if (t !== val) {
-        try {
-          rememberAttr(el, name, val);
-          el.setAttribute(name, t);
-          changed = true;
-        } catch (e) { /* 只读属性 */ }
-      }
-    }
-    return changed;
-  }
-
+  // ------------------------------------------------------------------ 归一化
   // GitHub 常把一个标签写成带换行/缩进的文本节点（"\n    Add new filter\n  "），
   // 浏览器渲染本来就会折叠空白，所以匹配前先归一化成单空格。
   // 首尾各保留一个空格，避免把相邻 span 的文字粘在一起。
@@ -446,63 +176,56 @@ var __GHZ_DEFAULTS__ = {"dictUrl":"https://raw.githubusercontent.com/XianYuYaaa/
     return lead + str.replace(WS_ALL, ' ').trim() + trail;
   }
 
-  // 词典升级时要把之前改过的文本还原，否则"内置词典先翻一遍、完整词典后到"
-  // 会留下翻了一半的句子。
-  var touched = [];
-
-  function rememberText(node, original) {
-    if (node.__ghzOrig === undefined) {
-      node.__ghzOrig = original;
-      touched.push(node);
-    }
-  }
-
-  function rememberAttr(el, name, original) {
-    if (!el.__ghzOrigAttr) el.__ghzOrigAttr = {};
-    if (el.__ghzOrigAttr[name] === undefined) el.__ghzOrigAttr[name] = original;
-    if (!el.__ghzAttrSeen) {
-      el.__ghzAttrSeen = 1;
-      touched.push(el);
-    }
-  }
-
-  function revertAll() {
-    for (var i = touched.length - 1; i >= 0; i--) {
-      var n = touched[i];
-      if (!n.isConnected) continue; // 已从文档移除的节点不用还原
-      if (typeof n.__ghzOrig === 'string') n.nodeValue = n.__ghzOrig;
-      if (n.__ghzOrigAttr) {
-        for (var k in n.__ghzOrigAttr) {
-          try {
-            n.setAttribute(k, n.__ghzOrigAttr[k]);
-          } catch (e) { /* 只读属性 */ }
+  // ------------------------------------------------------------------ 应用
+  function isSkipped(el) {
+    var node = el;
+    while (node && node.nodeType === 1) {
+      if (node.classList) {
+        var cl = node.classList;
+        for (var i = 0; i < cl.length; i++) {
+          if (FAST_SKIP[cl[i]]) return true;
         }
       }
+      try {
+        if (node.matches(SKIP_SEL)) return true;
+      } catch (e) { /* 选择器异常则忽略 */ }
+      node = node.parentElement;
     }
-    touched.length = 0;
-    memo.clear();
+    return false;
+  }
+
+  function translateAttrs(el) {
+    for (var i = 0; i < ATTRS.length; i++) {
+      var name = ATTRS[i];
+      var val = el.getAttribute(name);
+      if (!val || !/[A-Za-z]/.test(val)) continue;
+      var t = translateString(normalize(val));
+      if (t !== val) {
+        try {
+          el.setAttribute(name, t);
+        } catch (e) { /* 只读属性 */ }
+      }
+    }
   }
 
   function translateTextNode(node) {
     var text = node.nodeValue;
-    if (!text || !text.trim()) return false;
+    if (!text || !text.trim()) return;
     var src = normalize(text);
     var t = translateString(src);
-    if (t !== text) {
-      rememberText(node, text);
-      node.nodeValue = t;
-      return true;
-    }
-    return false;
+    if (t !== text) node.nodeValue = t;
   }
 
   function walk(root) {
     if (!root) return;
     var type = root.nodeType;
+
     if (type === 3) {
       if (root.parentElement && !isSkipped(root.parentElement)) translateTextNode(root);
       return;
     }
+    if (type !== 1 && type !== 9 && type !== 11) return;
+
     if (type === 1) {
       if (isSkipped(root)) return;
       translateAttrs(root);
@@ -511,7 +234,6 @@ var __GHZ_DEFAULTS__ = {"dictUrl":"https://raw.githubusercontent.com/XianYuYaaa/
         if (kids[i].nodeType === 3) translateTextNode(kids[i]);
       }
     }
-    if (type !== 1 && type !== 9 && type !== 11) return;
 
     var walker = document.createTreeWalker(root, NodeFilter.SHOW_ELEMENT | NodeFilter.SHOW_TEXT, {
       acceptNode: function (node) {
@@ -534,107 +256,78 @@ var __GHZ_DEFAULTS__ = {"dictUrl":"https://raw.githubusercontent.com/XianYuYaaa/
   }
 
   // ------------------------------------------------------------------ 启动
-  function start() {
-    if (!CONFIG.enabled) return;
-    if (!/(^|\.)github\.com$/.test(location.hostname)) return;
-
-    document.documentElement.setAttribute('lang', 'zh-CN');
-    walk(document.body || document.documentElement);
-
-    if (CONFIG.observeMutations) {
-      var pending = false;
-      var flush = function () {
-        if (pending) return;
-        pending = true;
-        requestAnimationFrame(function () {
-          pending = false;
-          walk(document.body);
-        });
-      };
-      observer = new MutationObserver(flush);
-      observer.observe(document.body, {
-        childList: true,
-        subtree: true,
-        characterData: true,
-        attributes: true,
-        attributeFilter: CONFIG.attrs
-      });
-    }
-  }
-
-  // GitHub 内部软导航后重跑一次
-  scope.addEventListener('pjax:end', function () { memo.clear(); walk(document.body); });
-  scope.addEventListener('turbo:load', function () { memo.clear(); walk(document.body); });
-
   var observer = null;
+
+  function observe() {
+    if (observer) return;
+    var pending = false;
+    observer = new MutationObserver(function () {
+      if (pending) return;
+      pending = true;
+      // 合并同一帧内的多次变更，避免重复全量遍历
+      requestAnimationFrame(function () {
+        pending = false;
+        walk(document.body);
+      });
+    });
+    observer.observe(document.body, {
+      childList: true,
+      subtree: true,
+      characterData: true,
+      attributes: true,
+      attributeFilter: ATTRS
+    });
+  }
 
   scope.GHZ = {
     config: CONFIG,
-    // 装载词典：先套用内置精简词典，随后由 loader 换成完整/远程词典
-    setData: function (data) {
+    // 装载词典并开始翻译
+    load: function (data) {
       compile(data);
-      if (!data || !Object.keys(data.terms || {}).length) return false;
-      document.documentElement.setAttribute('lang', 'zh-CN');
-      start();
-      return true;
-    },
-    // 词典升上去时：还原 -> 换词典 -> 重新全量翻译
-    upgrade: function (data) {
-      if (!data) return false;
-      compile(data);
+      var terms = (data && data.terms) || {};
+      if (!Object.keys(terms).length) return false;
+
       document.documentElement.setAttribute('lang', 'zh-CN');
       walk(document.body || document.documentElement);
+      observe();
       return true;
-    },
-    start: start,
-    walk: function () {
-      walk(document.body || document.documentElement);
     },
     translateString: translateString,
-    reset: function () {
+    // GitHub 内部软导航后重跑
+    rewalk: function () {
       memo.clear();
-    },
-    disconnect: function () {
-      if (observer) observer.disconnect();
+      walk(document.body);
     },
   };
+
+  // GitHub 内部软导航
+  scope.addEventListener('pjax:end', function () { if (exactMap.size) walk(document.body); });
+  scope.addEventListener('turbo:load', function () { if (exactMap.size) walk(document.body); });
 })(typeof unsafeWindow !== 'undefined' ? unsafeWindow : window);
 
 // ==================== loader.js ====================
-// 词典加载器：优先用远程 i18n/zh-CN.json，失败时退回脚本内置的精简词典。
-// 这样改词典只需要更新仓库文件，不需要重装脚本。
+// 词典加载：脚本本身不含任何词条，全部从仓库拉 i18n/zh-CN.json。
+// 维护时只改 i18n/zh-CN.json 一处，不用同步脚本。
 (function (scope) {
   'use strict';
 
-  var DEF = scope.__GHZ_DEFAULTS__ || {};
+  var DICT_URL = __GHZ_DICT_URL__;
 
-  var STORE_KEY = 'ghz:dict-url';
-  var CACHE_KEY = 'ghz:dict-cache';
+  var CACHE_KEY = 'ghz:dict';
   var CACHE_TTL = 6 * 60 * 60 * 1000; // 6 小时
+  var RETRY = [0, 2000, 5000, 12000]; // 失败后的重试间隔（毫秒）
 
-  function gmGet(k, d) {
-    try {
-      return GM_getValue(k, d);
-    } catch (e) {
-      return d;
-    }
+  function log() {
+    if (scope.console && console.log) console.log.apply(console, ['[github-zh]'].concat([].slice.call(arguments)));
   }
-  function gmSet(k, v) {
-    try {
-      GM_setValue(k, v);
-    } catch (e) {
-      /* 忽略 */
-    }
+  function warn() {
+    if (scope.console && console.warn) console.warn.apply(console, ['[github-zh]'].concat([].slice.call(arguments)));
   }
 
-  function getUrl() {
-    return gmGet(STORE_KEY, DEF.dictUrl || '');
-  }
-
-  // ---------------------------------------------------------------- 远程请求
-  function request(url) {
+  // ---------------------------------------------------------------- 传输
+  // 优先 GM_xmlhttpRequest：不受页面 CSP 和混合内容限制
+  function get(url) {
     return new Promise(function (resolve, reject) {
-      // 优先 GM_xmlhttpRequest：不受页面 CSP / 混合内容限制
       if (typeof GM_xmlhttpRequest === 'function') {
         GM_xmlhttpRequest({
           method: 'GET',
@@ -645,56 +338,51 @@ var __GHZ_DEFAULTS__ = {"dictUrl":"https://raw.githubusercontent.com/XianYuYaaa/
             if (res.status >= 200 && res.status < 300) resolve(res.responseText);
             else reject(new Error('HTTP ' + res.status));
           },
-          onerror: function () {
-            reject(new Error('network error'));
-          },
-          ontimeout: function () {
-            reject(new Error('timeout'));
-          },
+          onerror: function () { reject(new Error('network error')); },
+          ontimeout: function () { reject(new Error('timeout')); },
         });
         return;
       }
-      // 兜底：原生 fetch
-      if (typeof fetch === 'function') {
-        fetch(url, { credentials: 'omit' })
-          .then(function (r) {
-            if (!r.ok) throw new Error('HTTP ' + r.status);
-            return r.text();
-          })
-          .then(resolve, reject);
-        return;
-      }
-      reject(new Error('no transport available'));
+      // 兜底：原生 fetch（Violentmonkey 等未实现 GM_xmlhttpRequest 时）
+      fetch(url, { credentials: 'omit' })
+        .then(function (r) {
+          if (!r.ok) throw new Error('HTTP ' + r.status);
+          return r.text();
+        })
+        .then(resolve, reject);
     });
   }
 
-  function validate(obj) {
-    if (!obj || typeof obj !== 'object') return null;
-    if (!obj.terms || typeof obj.terms !== 'object') return null;
-    // 编译短语规则；非法正则直接丢弃，避免整份词典失效
+  // ---------------------------------------------------------------- 校验
+  function parse(text) {
+    var data = JSON.parse(text);
+    if (!data || typeof data.terms !== 'object' || !data.terms) throw new Error('词典格式错误：缺少 terms');
+
+    // 编译短语规则，非法正则直接丢弃，避免整份词典失效
     var phrases = [];
-    if (Array.isArray(obj.phrases)) {
-      for (var i = 0; i < obj.phrases.length; i++) {
-        var p = obj.phrases[i];
-        if (!p || typeof p.pattern !== 'string') continue;
+    if (Array.isArray(data.phrases)) {
+      for (var i = 0; i < data.phrases.length; i++) {
+        var p = data.phrases[i];
+        if (!p || typeof p.pattern !== 'string' || typeof p.replacement !== 'string') continue;
         try {
-          var re = new RegExp(p.pattern, (p.flags || '').replace(/[gy]/g, '') + 'g');
-          phrases.push({ re: re, rep: p.replacement });
-        } catch (e) {
-          /* 跳过坏规则 */
-        }
+          phrases.push({ re: new RegExp(p.pattern, (p.flags || '').replace(/[gy]/g, '') + 'g'), rep: p.replacement });
+        } catch (e) { /* 跳过坏规则 */ }
       }
     }
-    return { version: obj.version || 0, terms: obj.terms, phrases: phrases };
+
+    var terms = {};
+    for (var k in data.terms) {
+      if (Object.prototype.hasOwnProperty.call(data.terms, k)) terms[k] = data.terms[k];
+    }
+    return { version: data.version || 0, terms: terms, phrases: phrases };
   }
 
+  // ---------------------------------------------------------------- 缓存
   function readCache() {
     try {
-      var raw = localStorage.getItem(CACHE_KEY);
-      if (!raw) return null;
-      var box = JSON.parse(raw);
+      var box = JSON.parse(localStorage.getItem(CACHE_KEY) || 'null');
       if (!box || !box.at || Date.now() - box.at > CACHE_TTL) return null;
-      return validate(box.data);
+      return parse(JSON.stringify(box.data));
     } catch (e) {
       return null;
     }
@@ -702,101 +390,78 @@ var __GHZ_DEFAULTS__ = {"dictUrl":"https://raw.githubusercontent.com/XianYuYaaa/
 
   function writeCache(data) {
     try {
+      // 缓存只存原始数据，编译后的正则重新生成
       localStorage.setItem(CACHE_KEY, JSON.stringify({ at: Date.now(), data: { version: data.version, terms: data.terms, phrases: [] } }));
-    } catch (e) {
-      /* 配额不足就算了 */
-    }
+    } catch (e) { /* 配额不足就算了 */ }
   }
 
   // ---------------------------------------------------------------- 启动
   function boot() {
-    var api = scope.GHZ;
-    if (!api) return;
-
-    var url = getUrl();
-
-    function apply(data, tag) {
-      if (!data) return;
-      // upgrade 会先还原上一轮改动再整体重译，避免留下半句没翻的文本
-      api.upgrade(data);
-      if (scope.console && console.debug) {
-        console.debug('[github-zh] ' + tag + ': ' + Object.keys(data.terms).length + ' terms');
-      }
-    }
-
-    // 1) 先用内置精简词典，保证首屏就能翻
-    apply(validate(scope.__GHZ_FALLBACK__), '内置词典');
-
-    if (!url) {
-      if (scope.console && console.info) {
-        console.info('[github-zh] 未配置词典地址，仅使用内置词典');
-      }
-      return;
-    }
-
-    // 2) 有新鲜缓存就直接用
     var cached = readCache();
-    if (cached) {
-      apply(cached, '缓存');
-      // 后台静默刷新一次
-      refresh();
+    if (cached && scope.GHZ.load(cached)) {
+      log('已用缓存词典', Object.keys(cached.terms).length, '条');
+      refresh(true); // 后台静默更新
       return;
     }
+    refresh(false);
+  }
 
-    refresh();
+  function refresh(silent) {
+    var attempt = 0;
 
-    function refresh() {
-      request(url)
+    function attemptOnce() {
+      get(DICT_URL)
         .then(function (text) {
-          var data = validate(JSON.parse(text));
-          if (!data) throw new Error('bad payload');
+          var data = parse(text);
           writeCache(data);
-          apply(data, '远程');
+          scope.GHZ.load(data);
+          log('词典已加载', Object.keys(data.terms).length, '条');
         })
         .catch(function (err) {
-          if (scope.console && console.warn) {
-            console.warn('[github-zh] 词典拉取失败，已使用内置词典：', err.message);
+          attempt++;
+          if (attempt < RETRY.length) {
+            setTimeout(attemptOnce, RETRY[attempt]);
+          } else {
+            warn('词典拉取失败，页面保持原样。', err.message);
+            if (!silent) {
+              log('请检查网络，或稍后刷新重试。词典地址：', DICT_URL);
+            }
           }
         });
     }
+
+    attemptOnce();
   }
 
   // ---------------------------------------------------------------- 菜单
   function registerMenu() {
     if (typeof GM_registerMenuCommand !== 'function') return;
-    GM_registerMenuCommand('设置汉化词典地址', function () {
-      var cur = getUrl();
-      var next = window.prompt(
-        '汉化词典（zh-CN.json）的地址。\n留空则只使用脚本内置词典。\n\n当前：\n' + (cur || '（未设置）'),
-        cur
-      );
-      if (next === null) return;
-      next = (next || '').trim();
-      gmSet(STORE_KEY, next);
+
+    GM_registerMenuCommand('重新加载汉化词典', function () {
       try {
         localStorage.removeItem(CACHE_KEY);
-      } catch (e) {
-        /* 忽略 */
-      }
+      } catch (e) { /* 忽略 */ }
       window.location.reload();
     });
-    GM_registerMenuCommand('清空词典缓存', function () {
-      try {
-        localStorage.removeItem(CACHE_KEY);
-      } catch (e) {
-        /* 忽略 */
-      }
-      window.location.reload();
+
+    GM_registerMenuCommand('复制词典地址', function () {
+      var copy = function () {
+        if (navigator.clipboard) navigator.clipboard.writeText(DICT_URL);
+        log('词典地址已复制：', DICT_URL);
+      };
+      if (navigator.clipboard) copy();
+      else window.prompt('词典地址：', DICT_URL);
     });
   }
 
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', function () {
-      boot();
-      registerMenu();
-    });
-  } else {
+  function ready() {
     boot();
     registerMenu();
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', ready);
+  } else {
+    ready();
   }
 })(typeof unsafeWindow !== 'undefined' ? unsafeWindow : window);

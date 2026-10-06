@@ -1,37 +1,25 @@
-// 词典加载器：优先用远程 i18n/zh-CN.json，失败时退回脚本内置的精简词典。
-// 这样改词典只需要更新仓库文件，不需要重装脚本。
+// 词典加载：脚本本身不含任何词条，全部从仓库拉 i18n/zh-CN.json。
+// 维护时只改 i18n/zh-CN.json 一处，不用同步脚本。
 (function (scope) {
   'use strict';
 
-  var DEF = scope.__GHZ_DEFAULTS__ || {};
+  var DICT_URL = __GHZ_DICT_URL__;
 
-  var STORE_KEY = 'ghz:dict-url';
-  var CACHE_KEY = 'ghz:dict-cache';
+  var CACHE_KEY = 'ghz:dict';
   var CACHE_TTL = 6 * 60 * 60 * 1000; // 6 小时
+  var RETRY = [0, 2000, 5000, 12000]; // 失败后的重试间隔（毫秒）
 
-  function gmGet(k, d) {
-    try {
-      return GM_getValue(k, d);
-    } catch (e) {
-      return d;
-    }
+  function log() {
+    if (scope.console && console.log) console.log.apply(console, ['[github-zh]'].concat([].slice.call(arguments)));
   }
-  function gmSet(k, v) {
-    try {
-      GM_setValue(k, v);
-    } catch (e) {
-      /* 忽略 */
-    }
+  function warn() {
+    if (scope.console && console.warn) console.warn.apply(console, ['[github-zh]'].concat([].slice.call(arguments)));
   }
 
-  function getUrl() {
-    return gmGet(STORE_KEY, DEF.dictUrl || '');
-  }
-
-  // ---------------------------------------------------------------- 远程请求
-  function request(url) {
+  // ---------------------------------------------------------------- 传输
+  // 优先 GM_xmlhttpRequest：不受页面 CSP 和混合内容限制
+  function get(url) {
     return new Promise(function (resolve, reject) {
-      // 优先 GM_xmlhttpRequest：不受页面 CSP / 混合内容限制
       if (typeof GM_xmlhttpRequest === 'function') {
         GM_xmlhttpRequest({
           method: 'GET',
@@ -42,56 +30,51 @@
             if (res.status >= 200 && res.status < 300) resolve(res.responseText);
             else reject(new Error('HTTP ' + res.status));
           },
-          onerror: function () {
-            reject(new Error('network error'));
-          },
-          ontimeout: function () {
-            reject(new Error('timeout'));
-          },
+          onerror: function () { reject(new Error('network error')); },
+          ontimeout: function () { reject(new Error('timeout')); },
         });
         return;
       }
-      // 兜底：原生 fetch
-      if (typeof fetch === 'function') {
-        fetch(url, { credentials: 'omit' })
-          .then(function (r) {
-            if (!r.ok) throw new Error('HTTP ' + r.status);
-            return r.text();
-          })
-          .then(resolve, reject);
-        return;
-      }
-      reject(new Error('no transport available'));
+      // 兜底：原生 fetch（Violentmonkey 等未实现 GM_xmlhttpRequest 时）
+      fetch(url, { credentials: 'omit' })
+        .then(function (r) {
+          if (!r.ok) throw new Error('HTTP ' + r.status);
+          return r.text();
+        })
+        .then(resolve, reject);
     });
   }
 
-  function validate(obj) {
-    if (!obj || typeof obj !== 'object') return null;
-    if (!obj.terms || typeof obj.terms !== 'object') return null;
-    // 编译短语规则；非法正则直接丢弃，避免整份词典失效
+  // ---------------------------------------------------------------- 校验
+  function parse(text) {
+    var data = JSON.parse(text);
+    if (!data || typeof data.terms !== 'object' || !data.terms) throw new Error('词典格式错误：缺少 terms');
+
+    // 编译短语规则，非法正则直接丢弃，避免整份词典失效
     var phrases = [];
-    if (Array.isArray(obj.phrases)) {
-      for (var i = 0; i < obj.phrases.length; i++) {
-        var p = obj.phrases[i];
-        if (!p || typeof p.pattern !== 'string') continue;
+    if (Array.isArray(data.phrases)) {
+      for (var i = 0; i < data.phrases.length; i++) {
+        var p = data.phrases[i];
+        if (!p || typeof p.pattern !== 'string' || typeof p.replacement !== 'string') continue;
         try {
-          var re = new RegExp(p.pattern, (p.flags || '').replace(/[gy]/g, '') + 'g');
-          phrases.push({ re: re, rep: p.replacement });
-        } catch (e) {
-          /* 跳过坏规则 */
-        }
+          phrases.push({ re: new RegExp(p.pattern, (p.flags || '').replace(/[gy]/g, '') + 'g'), rep: p.replacement });
+        } catch (e) { /* 跳过坏规则 */ }
       }
     }
-    return { version: obj.version || 0, terms: obj.terms, phrases: phrases };
+
+    var terms = {};
+    for (var k in data.terms) {
+      if (Object.prototype.hasOwnProperty.call(data.terms, k)) terms[k] = data.terms[k];
+    }
+    return { version: data.version || 0, terms: terms, phrases: phrases };
   }
 
+  // ---------------------------------------------------------------- 缓存
   function readCache() {
     try {
-      var raw = localStorage.getItem(CACHE_KEY);
-      if (!raw) return null;
-      var box = JSON.parse(raw);
+      var box = JSON.parse(localStorage.getItem(CACHE_KEY) || 'null');
       if (!box || !box.at || Date.now() - box.at > CACHE_TTL) return null;
-      return validate(box.data);
+      return parse(JSON.stringify(box.data));
     } catch (e) {
       return null;
     }
@@ -99,101 +82,78 @@
 
   function writeCache(data) {
     try {
+      // 缓存只存原始数据，编译后的正则重新生成
       localStorage.setItem(CACHE_KEY, JSON.stringify({ at: Date.now(), data: { version: data.version, terms: data.terms, phrases: [] } }));
-    } catch (e) {
-      /* 配额不足就算了 */
-    }
+    } catch (e) { /* 配额不足就算了 */ }
   }
 
   // ---------------------------------------------------------------- 启动
   function boot() {
-    var api = scope.GHZ;
-    if (!api) return;
-
-    var url = getUrl();
-
-    function apply(data, tag) {
-      if (!data) return;
-      // upgrade 会先还原上一轮改动再整体重译，避免留下半句没翻的文本
-      api.upgrade(data);
-      if (scope.console && console.debug) {
-        console.debug('[github-zh] ' + tag + ': ' + Object.keys(data.terms).length + ' terms');
-      }
-    }
-
-    // 1) 先用内置精简词典，保证首屏就能翻
-    apply(validate(scope.__GHZ_FALLBACK__), '内置词典');
-
-    if (!url) {
-      if (scope.console && console.info) {
-        console.info('[github-zh] 未配置词典地址，仅使用内置词典');
-      }
-      return;
-    }
-
-    // 2) 有新鲜缓存就直接用
     var cached = readCache();
-    if (cached) {
-      apply(cached, '缓存');
-      // 后台静默刷新一次
-      refresh();
+    if (cached && scope.GHZ.load(cached)) {
+      log('已用缓存词典', Object.keys(cached.terms).length, '条');
+      refresh(true); // 后台静默更新
       return;
     }
+    refresh(false);
+  }
 
-    refresh();
+  function refresh(silent) {
+    var attempt = 0;
 
-    function refresh() {
-      request(url)
+    function attemptOnce() {
+      get(DICT_URL)
         .then(function (text) {
-          var data = validate(JSON.parse(text));
-          if (!data) throw new Error('bad payload');
+          var data = parse(text);
           writeCache(data);
-          apply(data, '远程');
+          scope.GHZ.load(data);
+          log('词典已加载', Object.keys(data.terms).length, '条');
         })
         .catch(function (err) {
-          if (scope.console && console.warn) {
-            console.warn('[github-zh] 词典拉取失败，已使用内置词典：', err.message);
+          attempt++;
+          if (attempt < RETRY.length) {
+            setTimeout(attemptOnce, RETRY[attempt]);
+          } else {
+            warn('词典拉取失败，页面保持原样。', err.message);
+            if (!silent) {
+              log('请检查网络，或稍后刷新重试。词典地址：', DICT_URL);
+            }
           }
         });
     }
+
+    attemptOnce();
   }
 
   // ---------------------------------------------------------------- 菜单
   function registerMenu() {
     if (typeof GM_registerMenuCommand !== 'function') return;
-    GM_registerMenuCommand('设置汉化词典地址', function () {
-      var cur = getUrl();
-      var next = window.prompt(
-        '汉化词典（zh-CN.json）的地址。\n留空则只使用脚本内置词典。\n\n当前：\n' + (cur || '（未设置）'),
-        cur
-      );
-      if (next === null) return;
-      next = (next || '').trim();
-      gmSet(STORE_KEY, next);
+
+    GM_registerMenuCommand('重新加载汉化词典', function () {
       try {
         localStorage.removeItem(CACHE_KEY);
-      } catch (e) {
-        /* 忽略 */
-      }
+      } catch (e) { /* 忽略 */ }
       window.location.reload();
     });
-    GM_registerMenuCommand('清空词典缓存', function () {
-      try {
-        localStorage.removeItem(CACHE_KEY);
-      } catch (e) {
-        /* 忽略 */
-      }
-      window.location.reload();
+
+    GM_registerMenuCommand('复制词典地址', function () {
+      var copy = function () {
+        if (navigator.clipboard) navigator.clipboard.writeText(DICT_URL);
+        log('词典地址已复制：', DICT_URL);
+      };
+      if (navigator.clipboard) copy();
+      else window.prompt('词典地址：', DICT_URL);
     });
   }
 
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', function () {
-      boot();
-      registerMenu();
-    });
-  } else {
+  function ready() {
     boot();
     registerMenu();
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', ready);
+  } else {
+    ready();
   }
 })(typeof unsafeWindow !== 'undefined' ? unsafeWindow : window);
